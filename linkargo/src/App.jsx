@@ -18,33 +18,31 @@ import MessagesScreen from './screens/MessagesScreen';
 function AppInner() {
   const { user } = useApp();
 
-  // Navigation state
   const [tab, setTab] = useState('home');
-  const [overlay, setOverlay] = useState(null); // { type, data }
+  const [overlay, setOverlay] = useState(null);
 
   if (!user) return <AuthScreen />;
 
   const isCarrier = user.role === 'carrier';
-
   const closeOverlay = () => setOverlay(null);
 
   const renderTab = () => {
     if (isCarrier) {
       switch (tab) {
-        case 'home':    return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
-        case 'quotes':  return <CarrierQuotes />;
+        case 'home':     return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
+        case 'quotes':   return <CarrierQuotes />;
         case 'messages': return <MessagesScreen />;
-        case 'profile': return <ProfileScreen />;
-        default:        return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
+        case 'profile':  return <ProfileScreen />;
+        default:         return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
       }
     } else {
       switch (tab) {
-        case 'home':    return <ShipperHome onTabChange={setTab} />;
-        case 'post':    return <PostJob onBack={() => setTab('home')} onSuccess={() => { setTab('my-jobs'); }} />;
-        case 'my-jobs': return <MyJobs onViewQuotes={(job) => setOverlay({ type: 'quotes', job })} />;
+        case 'home':     return <ShipperHome onTabChange={setTab} />;
+        case 'post':     return <PostJob onBack={() => setTab('home')} onSuccess={() => setTab('my-jobs')} />;
+        case 'my-jobs':  return <MyJobs onViewQuotes={(job) => setOverlay({ type: 'quotes', job })} />;
         case 'messages': return <MessagesScreen />;
-        case 'profile': return <ProfileScreen />;
-        default:        return <ShipperHome onTabChange={setTab} />;
+        case 'profile':  return <ProfileScreen />;
+        default:         return <ShipperHome onTabChange={setTab} />;
       }
     }
   };
@@ -53,18 +51,32 @@ function AppInner() {
     <div style={{ maxWidth: 480, margin: '0 auto', position: 'relative', minHeight: '100vh' }}>
       {renderTab()}
 
-      {/* Overlays */}
+      {/* Quotes overlay */}
       {overlay?.type === 'quotes' && (
         <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 150, maxWidth: 480, margin: '0 auto', overflowY: 'auto' }}>
           <Quotations job={overlay.job} onBack={closeOverlay} onChat={(q) => setOverlay({ type: 'chat', quote: q })} />
         </div>
       )}
 
+      {/* Send quote overlay */}
       {overlay?.type === 'sendQuote' && (
         <SendQuote job={overlay.job} onClose={closeOverlay} onSuccess={closeOverlay} />
       )}
 
-      {/* Bottom Nav — hidden during post flow on mobile for clean UX */}
+      {/* Chat overlay — opened from quote card */}
+      {overlay?.type === 'chat' && (
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 200, maxWidth: 480, margin: '0 auto' }}>
+          <MessagesScreen
+            preloadConv={{
+              job_id: overlay.quote.job_id,
+              job: overlay.quote.job || {},
+              other_user: overlay.quote.carrier,
+            }}
+            onBack={() => setOverlay({ type: 'quotes', job: overlay.quote.job })}
+          />
+        </div>
+      )}
+
       {tab !== 'post' && (
         <BottomNav activeTab={tab} onTabChange={setTab} role={user.role} />
       )}

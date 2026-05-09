@@ -70,11 +70,11 @@ function Avatar({ name, size = 42 }) {
 
 // ─── Conversations List ───────────────────────────────────────
 
-export default function MessagesScreen() {
+export default function MessagesScreen({ preloadConv = null, onBack = null }) {
   const { user } = useApp();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeConv, setActiveConv] = useState(null);
+  const [activeConv, setActiveConv] = useState(preloadConv);
 
   const loadConversations = useCallback(async () => {
     try {
@@ -109,7 +109,7 @@ export default function MessagesScreen() {
       <ChatScreen
         currentUser={user}
         conversation={activeConv}
-        onBack={() => { setActiveConv(null); loadConversations(); }}
+        onBack={preloadConv && onBack ? onBack : () => { setActiveConv(null); loadConversations(); }}
       />
     );
   }
