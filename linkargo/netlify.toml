@@ -1,0 +1,4 @@
+[build]
+  base = "linkargo"
+  command = "CI= npm run build"
+  publish = "linkargo/build"
