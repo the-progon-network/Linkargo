@@ -13,6 +13,7 @@ import SendQuote from './screens/carrier/SendQuote';
 import ProfileScreen from './screens/ProfileScreen';
 import BottomNav from './components/BottomNav';
 import ShipperHome from './screens/customer/ShipperHome';
+import MessagesScreen from './screens/MessagesScreen';
 
 function AppInner() {
   const { user } = useApp();
@@ -32,7 +33,7 @@ function AppInner() {
       switch (tab) {
         case 'home':    return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
         case 'quotes':  return <CarrierQuotes />;
-        case 'messages': return <MessagesPlaceholder />;
+        case 'messages': return <MessagesScreen />;
         case 'profile': return <ProfileScreen />;
         default:        return <CarrierHome onSendQuote={(job) => setOverlay({ type: 'sendQuote', job })} />;
       }
@@ -41,7 +42,7 @@ function AppInner() {
         case 'home':    return <ShipperHome onTabChange={setTab} />;
         case 'post':    return <PostJob onBack={() => setTab('home')} onSuccess={() => { setTab('my-jobs'); }} />;
         case 'my-jobs': return <MyJobs onViewQuotes={(job) => setOverlay({ type: 'quotes', job })} />;
-        case 'messages': return <MessagesPlaceholder />;
+        case 'messages': return <MessagesScreen />;
         case 'profile': return <ProfileScreen />;
         default:        return <ShipperHome onTabChange={setTab} />;
       }
@@ -67,16 +68,6 @@ function AppInner() {
       {tab !== 'post' && (
         <BottomNav activeTab={tab} onTabChange={setTab} role={user.role} />
       )}
-    </div>
-  );
-}
-
-function MessagesPlaceholder() {
-  return (
-    <div style={{ padding: '80px 24px', textAlign: 'center' }}>
-      <div style={{ fontSize: 48, marginBottom: 12 }}>💬</div>
-      <h2 style={{ fontWeight: 800, marginBottom: 8 }}>Messages</h2>
-      <p style={{ color: 'var(--text-secondary)' }}>In-app messaging coming in v2. For now, carriers' phone numbers are visible on accepted quotes.</p>
     </div>
   );
 }
