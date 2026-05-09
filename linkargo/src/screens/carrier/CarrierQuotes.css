@@ -1,0 +1,75 @@
+.carrier-quotes-screen {
+  min-height: 100vh;
+  background: var(--bg);
+  padding-bottom: 80px;
+}
+
+.earnings-strip {
+  display: flex;
+  background: var(--primary);
+  padding: 16px;
+  gap: 0;
+}
+
+.earn-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  color: white;
+  padding: 0 8px;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+.earn-card:last-child { border-right: none; }
+
+.earn-card svg { opacity: 0.8; flex-shrink: 0; }
+.earn-val { font-size: 16px; font-weight: 800; }
+.earn-label { font-size: 10px; opacity: 0.75; font-weight: 600; }
+
+.carrier-quotes-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.my-quote-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  padding: 16px;
+}
+.my-quote-card.status-accepted { border-color: #065F46; background: #F0FDF4; }
+.my-quote-card.status-rejected { opacity: 0.6; }
+
+.mqc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.mqc-route { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+.mqc-goods { font-size: 13px; color: var(--text-secondary); margin-bottom: 10px; }
+.mqc-price { font-size: 22px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
+
+.mqc-note {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--border-dark);
+}
+
+.mqc-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
