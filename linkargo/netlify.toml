@@ -1,4 +1,4 @@
 [build]
   base = "linkargo"
-  command = "CI= npm run build"
+  command = "npm install --include=dev && ./node_modules/.bin/react-scripts build"
   publish = "linkargo/build"
