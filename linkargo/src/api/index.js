@@ -1,72 +1,65 @@
-const delay = (ms = 400) => new Promise(r => setTimeout(r, ms));
+// ============================================
+// LINKARGO REAL API
+// Replace src/api/index.js with this file
+// ============================================
 
-let currentUser = null;
-let jobs = [];
-let quotes = [];
-let jobIdCounter = 1;
-let quoteIdCounter = 1;
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
+// ── Helper: make authenticated requests ──
+async function request(method, path, body = null) {
+  const token = localStorage.getItem('linkargo_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : null,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+// ── Auth ──
 export const auth = {
-  login: async ({ email, password }) => {
-    await delay();
-    const user = { id: 1, name: 'Ahmed Khan', email, role: 'shipper', phone: '0311-1234567', company_name: 'Khan Traders' };
-    currentUser = user;
-    return { user, token: 'mock-token' };
-  },
-  register: async (form) => {
-    await delay();
-    const user = { id: 1, name: form.name, email: form.email, role: form.role, phone: form.phone, company_name: form.company_name, vehicle_type: form.vehicle_type, license_plate: form.license_plate };
-    currentUser = user;
-    return { user, token: 'mock-token' };
-  },
+  login: ({ email, password }) => request('POST', '/auth/login', { email, password }),
+  register: (form) => request('POST', '/auth/register', form),
+  me: () => request('GET', '/auth/me'),
 };
 
-export const jobsApi = {
-  list: async () => { await delay(); return { jobs }; },
-  myJobs: async () => { await delay(); return { jobs }; },
-  create: async (form) => {
-    await delay();
-    const job = { id: jobIdCounter++, ...form, created_at: new Date().toISOString(), quote_count: 0 };
-    jobs.unshift(job);
-    return { job };
+// ── Jobs ──
+export const jobs = {
+  list: (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.vehicle_type) params.set('vehicle_type', filters.vehicle_type);
+    if (filters.city) params.set('city', filters.city);
+    const qs = params.toString();
+    return request('GET', `/jobs${qs ? '?' + qs : ''}`);
   },
+  myJobs: () => request('GET', '/jobs/my'),
+  get: (id) => request('GET', `/jobs/${id}`),
+  create: (form) => request('POST', '/jobs', form),
+  updateStatus: (id, status) => request('PATCH', `/jobs/${id}/status`, { status }),
 };
 
-export const quotesApi = {
-  submit: async (jobId, form) => {
-    await delay();
-    const quote = { id: quoteIdCounter++, job_id: jobId, ...form, status: 'pending', created_at: new Date().toISOString() };
-    quotes.unshift(quote);
-    const job = jobs.find(j => j.id === jobId);
-    if (job) job.quote_count = (job.quote_count || 0) + 1;
-    return { quote };
-  },
-  forJob: async (jobId) => {
-    await delay();
-    return { quotes: quotes.filter(q => q.job_id === jobId).map(q => ({ ...q, job: jobs.find(j => j.id === q.job_id) })) };
-  },
-  myQuotes: async () => {
-    await delay();
-    return { quotes: quotes.map(q => ({ ...q, job: jobs.find(j => j.id === q.job_id) })) };
-  },
-  accept: async (quoteId) => {
-    await delay();
-    quotes = quotes.map(q => q.id === quoteId ? { ...q, status: 'accepted' } : { ...q, status: q.status === 'pending' ? 'rejected' : q.status });
-    return { success: true };
-  },
+// ── Quotes ──
+export const quotes = {
+  submit: (jobId, form) => request('POST', `/quotes/${jobId}`, form),
+  listForJob: (jobId) => request('GET', `/quotes/job/${jobId}`),
+  myQuotes: () => request('GET', '/quotes/my'),
+  accept: (quoteId) => request('PATCH', `/quotes/${quoteId}/accept`),
+  reject: (quoteId) => request('PATCH', `/quotes/${quoteId}/reject`),
 };
 
+// ── Stats ──
 export const stats = {
-  shipper: async () => {
-    await delay();
-    return { total_jobs: jobs.length, active_jobs: jobs.length, pending_quotes: quotes.filter(q => q.status === 'pending').length, completed_jobs: 0, total_spent: 0 };
-  },
-  carrier: async () => {
-    await delay();
-    return { total_revenue: 0, completed_jobs: 0, acceptance_rate: 0 };
-  },
+  shipper: () => request('GET', '/jobs/stats/shipper'),
+  carrier: () => request('GET', '/jobs/stats/carrier'),
 };
 
+// ── Profiles ──
 export const profiles = {
-  update: async (form) => { await delay(); return { success: true }; },
+  update: (form) => request('PATCH', '/profiles/me', form),
 };
